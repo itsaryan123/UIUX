@@ -1,0 +1,1192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supplier Query Module - Food Safety UX</title>
+  <style>
+    :root {
+      --bg: #f3efe7;
+      --panel: #fffaf2;
+      --panel-2: #f8f1e5;
+      --ink: #1f2933;
+      --muted: #64707d;
+      --line: #d8cbb6;
+      --accent: #0f766e;
+      --accent-2: #f59e0b;
+      --good: #15803d;
+      --warn: #b45309;
+      --bad: #b91c1c;
+      --shadow: 0 18px 50px rgba(31, 41, 51, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(245, 158, 11, 0.10), transparent 24%),
+        linear-gradient(180deg, #fbf8f1 0%, #f3efe7 100%);
+    }
+
+    .wrap {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 44px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 20px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .hero-card, .section-card, .screen {
+      background: rgba(255, 250, 242, 0.9);
+      border: 1px solid rgba(216, 203, 182, 0.9);
+      box-shadow: var(--shadow);
+      border-radius: 22px;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-card {
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -40px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15,118,110,0.12), transparent 68%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(15, 118, 110, 0.1);
+      color: var(--accent);
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      font-size: clamp(2rem, 3.2vw, 3.35rem);
+      line-height: 1.03;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+    }
+
+    .hero p {
+      font-size: 1.03rem;
+      line-height: 1.65;
+      color: var(--muted);
+      max-width: 66ch;
+      margin-bottom: 0;
+    }
+
+    .metrics {
+      display: grid;
+      gap: 14px;
+      padding: 22px;
+    }
+
+    .metric {
+      background: linear-gradient(180deg, #ffffff 0%, #f9f3e9 100%);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px 18px;
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+    }
+
+    .metric .value {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .metric .sub {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-top: 4px;
+    }
+
+    .section {
+      margin-top: 18px;
+    }
+
+    .section-card {
+      padding: 22px;
+      margin-bottom: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .section-head h2 {
+      font-size: 1.3rem;
+      margin-bottom: 6px;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 0;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .flow-step {
+      position: relative;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fffefb 0%, #f8f1e5 100%);
+      min-height: 126px;
+    }
+
+    .flow-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-weight: 800;
+      font-size: 1.3rem;
+    }
+
+    .flow-step .num {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .flow-step h3 {
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .flow-step p {
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 0;
+      font-size: 0.95rem;
+    }
+
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .screen {
+      overflow: hidden;
+      min-height: 760px;
+    }
+
+    .screen-top {
+      padding: 18px 18px 0;
+      border-bottom: 1px solid rgba(216, 203, 182, 0.75);
+      background: linear-gradient(180deg, #fffaf2 0%, #f9f3e8 100%);
+    }
+
+    .device-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .device-bar span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #d8cbb6;
+    }
+
+    .screen-title {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .screen-title h3 {
+      margin: 0;
+      font-size: 1.02rem;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 7px 10px;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .badge-icon {
+      font-size: 0.9rem;
+    }
+
+    .badge.pending { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
+    .badge.resolved { background: rgba(21, 128, 61, 0.14); color: var(--good); }
+    .badge.urgent { background: rgba(185, 28, 28, 0.13); color: var(--bad); }
+    .badge.soft { background: rgba(15, 118, 110, 0.12); color: var(--accent); }
+
+    .screen-body {
+      padding: 18px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .stat-pill {
+      border: 1px solid var(--line);
+      background: #fffaf4;
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .stat-pill .kicker {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-pill strong {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 2px;
+    }
+
+    .stat-pill span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .search-row, .form-row, .legend, .tabs, .timeline {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-row {
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #fffdf8;
+      border: 1px solid var(--line);
+      border-top: none;
+      border-radius: 0 0 14px 14px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: none;
+      z-index: 10;
+    }
+
+    .search-suggestions.is-visible {
+      display: block;
+    }
+
+    .suggestion-item {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(216, 203, 182, 0.4);
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: rgba(15, 118, 110, 0.08);
+      color: var(--accent);
+    }
+
+    .search-history {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(216, 203, 182, 0.4);
+      margin-bottom: 10px;
+    }
+
+    .search-history .small {
+      padding: 8px 14px;
+      display: block;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.is-visible {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #fffaf2;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 28px;
+      max-width: 420px;
+      width: calc(100% - 32px);
+      box-shadow: 0 20px 60px rgba(31, 41, 51, 0.2);
+    }
+
+    .modal-box h3 {
+      margin: 0 0 16px;
+      font-size: 1.2rem;
+    }
+
+    .modal-summary {
+      background: #f9f3e8;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .modal-actions .button {
+      padding: 10px 16px;
+      font-size: 0.9rem;
+    }
+
+    .field, .input, .textarea, .select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fffdf8;
+      color: var(--ink);
+      padding: 12px 14px;
+      font: inherit;
+    }
+
+    .input::placeholder, .textarea::placeholder { color: #94a3b8; }
+    .input:focus, .textarea:focus, .select:focus { outline: 2px solid rgba(15,118,110,0.25); border-color: var(--accent); }
+
+    .stack { display: grid; gap: 12px; }
+    .supplier-card, .query-card, .note-card {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fffdf8;
+      padding: 14px;
+    }
+
+    .supplier-card {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .supplier-card.is-hidden {
+      display: none;
+    }
+
+    .supplier-top, .query-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .supplier-top > div:first-child {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      flex: 1;
+    }
+
+    .supplier-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .supplier-avatar.gvf { background: linear-gradient(135deg, #10b981, #059669); }
+    .supplier-avatar.ncd { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .supplier-avatar.ssl { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+    .supplier-name {
+      font-weight: 800;
+      margin-bottom: 2px;
+    }
+
+    .supplier-meta, .small {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+    }
+
+    .progress {
+      height: 10px;
+      border-radius: 999px;
+      background: #efe5d2;
+      overflow: hidden;
+    }
+
+    .progress > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), #25a39a);
+    }
+
+    .supplier-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .button, .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .button {
+      background: var(--accent);
+      color: white;
+      padding: 11px 14px;
+      box-shadow: 0 10px 20px rgba(15,118,110,0.18);
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--accent);
+      border-color: rgba(15,118,110,0.28);
+      box-shadow: none;
+    }
+
+    .chip {
+      padding: 7px 10px;
+      background: #f3efe7;
+      color: var(--muted);
+      font-size: 0.78rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .chip-icon {
+      font-size: 0.9rem;
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .chip.is-active {
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--accent);
+      border-color: rgba(15, 118, 110, 0.2);
+    }
+
+    .template-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .template-chip {
+      border: 1px solid rgba(15, 118, 110, 0.2);
+      background: rgba(15, 118, 110, 0.08);
+      color: var(--accent);
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .template-icon {
+      font-size: 1rem;
+      display: inline-block;
+    }
+
+    .template-chip:hover,
+    .template-chip:focus-visible {
+      background: rgba(15, 118, 110, 0.14);
+      outline: none;
+    }
+
+    .attachment-area {
+      border: 1px dashed rgba(15, 118, 110, 0.25);
+      background: rgba(15, 118, 110, 0.05);
+      border-radius: 18px;
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .attachment-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .attachment-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .attachment-list .chip {
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--accent);
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .textarea {
+      min-height: 122px;
+      resize: vertical;
+    }
+
+    .timeline {
+      position: relative;
+      flex-direction: column;
+      gap: 14px;
+      padding-left: 18px;
+      margin-top: 6px;
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: #dbcdb5;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding: 14px 14px 14px 16px;
+      border: 1px solid var(--line);
+      background: #fffdf8;
+      border-radius: 16px;
+    }
+
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      left: -21px;
+      top: 18px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 3px solid #fffdf8;
+      box-shadow: 0 0 0 1px rgba(15,118,110,0.2);
+    }
+
+    .timeline-item.done::before { background: var(--good); }
+    .timeline-item.wait::before { background: var(--warn); }
+    .timeline-item.alert::before { background: var(--bad); }
+
+    .timeline-item h4 {
+      margin: 0 0 6px;
+      font-size: 0.96rem;
+    }
+
+    .timeline-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 0.9rem;
+    }
+
+    .note-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .note-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .status-summary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .activity-feed {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fffdf8;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .activity-feed h4 {
+      margin: 0 0 10px;
+      font-size: 0.96rem;
+    }
+
+    .activity-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .activity-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-top: 1px solid rgba(216, 203, 182, 0.55);
+    }
+
+    .activity-icon {
+      min-width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .activity-icon.submit { background: rgba(15, 118, 110, 0.15); color: var(--accent); }
+    .activity-icon.acknowledge { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    .activity-icon.receive { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .activity-icon.close { background: rgba(245, 158, 11, 0.15); color: var(--warn); }
+
+    .activity-icon.submit { background: rgba(15, 118, 110, 0.15); }
+    .activity-icon.acknowledge { background: rgba(59, 130, 246, 0.15); }
+    .activity-icon.receive { background: rgba(16, 185, 129, 0.15); }
+    .activity-icon.close { background: rgba(245, 158, 11, 0.15); }
+
+    .activity-item:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .activity-time {
+      min-width: 64px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .activity-item p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.9rem;
+    }
+
+    .summary-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fffdf8;
+      padding: 14px;
+    }
+
+    .summary-card strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.98rem;
+    }
+
+    .summary-card span {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.45;
+      display: block;
+    }
+
+    .note-card li + li { margin-top: 6px; }
+
+    .footer {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 1080px) {
+      .modal-box {
+        max-width: none;
+      }
+      .hero, .screens, .note-grid, .stats-row, .status-summary { grid-template-columns: 1fr; }
+      .flow { grid-template-columns: 1fr; }
+      .flow-step:not(:last-child)::after { content: "↓"; right: 18px; top: auto; bottom: -18px; transform: none; }
+      .screen { min-height: auto; }
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/index-B_qEcCor.js"></script>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-card">
+        <div class="eyebrow">Food Safety QA Workflow</div>
+        <h1>Supplier queries should feel trackable, not buried in email.</h1>
+        <p>
+          This concept turns supplier follow-ups into a simple control panel for QA managers:
+          choose a supplier, raise a query with clear labels, and see the response status at a glance.
+        </p>
+      </div>
+      <aside class="hero-card metrics" aria-label="Design goals">
+        <div class="metric">
+          <div class="label">Primary user</div>
+          <div class="value">QA manager</div>
+          <div class="sub">Needs a fast way to follow up on food safety information.</div>
+        </div>
+        <div class="metric">
+          <div class="label">Main outcomes</div>
+          <div class="value">Less chasing, more visibility</div>
+          <div class="sub">Status is visible without opening each query thread.</div>
+        </div>
+        <div class="metric">
+          <div class="label">Interaction style</div>
+          <div class="value">List → form → status</div>
+          <div class="sub">A short path reduces error and saves time.</div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>User Flow</h2>
+          <p>How the user moves from supplier selection to query submission and then to tracking the response.</p>
+        </div>
+        <span class="badge soft">3-step flow</span>
+      </div>
+      <div class="flow" role="list" aria-label="User flow">
+        <article class="flow-step" role="listitem">
+          <div class="num">1</div>
+          <h3>Select supplier</h3>
+          <p>Browse suppliers with visible status chips and pick the one that needs follow-up.</p>
+        </article>
+        <article class="flow-step" role="listitem">
+          <div class="num">2</div>
+          <h3>Submit query</h3>
+          <p>Use a short, guided form with subject, category, due date, and a clear question prompt.</p>
+        </article>
+        <article class="flow-step" role="listitem">
+          <div class="num">3</div>
+          <h3>View status</h3>
+          <p>Track progress on a timeline/card view with readable milestones such as sent, awaiting reply, and resolved.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>UI Screens</h2>
+          <p>Three mockups show the core task flow with consistent spacing, icon-like chips, and clear labels.</p>
+        </div>
+        <span class="badge pending">Query states</span>
+      </div>
+
+      <div class="screens">
+        <article class="screen" aria-label="Supplier List Page mockup">
+          <div class="screen-top">
+            <div class="device-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="screen-title">
+              <div>
+                <h3>Supplier List Page</h3>
+                <div class="small">Filter suppliers and spot query status immediately.</div>
+              </div>
+              <span class="badge pending">4 pending</span>
+            </div>
+          </div>
+          <div class="screen-body">
+            <div class="stats-row" aria-label="Query summary">
+              <div class="stat-pill">
+                <span class="kicker">Open queries</span>
+                <strong>12</strong>
+                <span>Across 3 suppliers</span>
+              </div>
+              <div class="stat-pill">
+                <span class="kicker">Overdue</span>
+                <strong>4</strong>
+                <span>Needs follow-up today</span>
+              </div>
+              <div class="stat-pill">
+                <span class="kicker">Resolved this week</span>
+                <strong>7</strong>
+                <span>Ready for archive</span>
+              </div>
+            </div>
+            <div class="search-row" id="search-container">
+              <input class="input" type="search" id="supplier-search" aria-label="Search suppliers" placeholder="Search supplier or ingredient..." />
+              <div class="search-suggestions" id="search-suggestions" aria-label="Search suggestions">
+                <div class="search-history" id="search-history">
+                  <span class="small">Recent</span>
+                </div>
+              </div>
+            </div>
+            <div class="filter-row" aria-label="Filters">
+              <span class="chip is-active" data-filter="all">All suppliers</span>
+              <span class="chip" data-filter="pending">Pending</span>
+              <span class="chip" data-filter="overdue">Overdue</span>
+              <span class="chip" data-filter="resolved">Resolved</span>
+            </div>
+
+            <div class="stack">
+              <div class="supplier-card" data-status="overdue">
+                <div class="supplier-top">
+                  <div>
+                    <div class="supplier-avatar gvf">GV</div>
+                    <div>
+                      <div class="supplier-name">Green Valley Farms</div>
+                      <div class="supplier-meta">Allergen statement requested • last contact 2 days ago</div>
+                    </div>
+                  </div>
+                  <span class="badge urgent"><span class="badge-icon">⚠️</span> Overdue</span>
+                </div>
+                <div class="progress" aria-label="Query progress 70 percent"><span style="width: 70%"></span></div>
+                <div class="supplier-actions">
+                  <span class="chip"><span class="chip-icon">🥜</span> Peanut risk check</span>
+                  <a class="button secondary" href="#query-form">Raise query</a>
+                </div>
+              </div>
+
+              <div class="supplier-card" data-status="pending">
+                <div class="supplier-top">
+                  <div>
+                    <div class="supplier-avatar ncd">NC</div>
+                    <div>
+                      <div class="supplier-name">North Coast Dairy</div>
+                      <div class="supplier-meta">Certificate expiry reminder • awaiting response</div>
+                    </div>
+                  </div>
+                  <span class="badge pending"><span class="badge-icon">⏳</span> Pending</span>
+                </div>
+                <div class="progress" aria-label="Query progress 45 percent"><span style="width: 45%"></span></div>
+                <div class="supplier-actions">
+                  <span class="chip"><span class="chip-icon">📋</span> Expiry review</span>
+                  <span class="chip"><span class="chip-icon">✅</span> COA uploaded</span>
+                </div>
+              </div>
+
+              <div class="supplier-card" data-status="resolved">
+                <div class="supplier-top">
+                  <div>
+                    <div class="supplier-avatar ssl">SS</div>
+                    <div>
+                      <div class="supplier-name">Summit Spices Ltd</div>
+                      <div class="supplier-meta">Ingredient safety details confirmed • resolved</div>
+                    </div>
+                  </div>
+                  <span class="badge resolved"><span class="badge-icon">✓</span> Resolved</span>
+                </div>
+                <div class="progress" aria-label="Query progress 100 percent"><span style="width: 100%"></span></div>
+                <div class="supplier-actions">
+                  <span class="chip"><span class="chip-icon">🏁</span> Completed</span>
+                  <span class="chip"><span class="chip-icon">📦</span> Archived</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="screen" id="query-form" aria-label="Raise New Query Page mockup">
+          <div class="screen-top">
+            <div class="device-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="screen-title">
+              <div>
+                <h3>Raise New Query Page</h3>
+                <div class="small">Keep the form short and structured.</div>
+              </div>
+              <span class="badge soft">Draft</span>
+            </div>
+          </div>
+          <div class="screen-body">
+            <div class="template-row" aria-label="Query templates">
+              <button class="template-chip" type="button" data-template="allergen"><span class="template-icon">🥜</span> Allergen check</button>
+              <button class="template-chip" type="button" data-template="certificate"><span class="template-icon">📜</span> Certificate expiry</button>
+              <button class="template-chip" type="button" data-template="safety"><span class="template-icon">🔬</span> Ingredient safety</button>
+            </div>
+            <div class="form-grid">
+              <div>
+                <label class="field-label" for="supplier">Supplier</label>
+                <select class="select" id="supplier" aria-label="Select supplier">
+                  <option>North Coast Dairy</option>
+                  <option>Green Valley Farms</option>
+                  <option>Summit Spices Ltd</option>
+                </select>
+              </div>
+              <div>
+                <label class="field-label" for="category">Query type</label>
+                <select class="select" id="category" aria-label="Select query type">
+                  <option>Allergen information</option>
+                  <option>Certificate expiry</option>
+                  <option>Ingredient safety</option>
+                </select>
+              </div>
+              <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div>
+                  <label class="field-label" for="priority">Priority</label>
+                  <select class="select" id="priority" aria-label="Select priority">
+                    <option>Medium</option>
+                    <option>High</option>
+                    <option>Urgent</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="field-label" for="due">Due date</label>
+                  <input class="input" id="due" type="date" aria-label="Due date" />
+                </div>
+              </div>
+              <div>
+                <label class="field-label" for="question">Question</label>
+                <textarea class="textarea" id="question" aria-label="Query details" placeholder="Example: Please confirm whether any milk-derived allergens are present in the current formulation and attach the latest certificate."></textarea>
+              </div>
+              <div class="attachment-area" aria-label="Supporting documents">
+                <div class="attachment-meta">
+                  <div>
+                    <label class="field-label" for="attachments" style="margin-bottom: 4px;">Attachments</label>
+                    <div class="small">Optional, but useful for COAs, certificates, and photos.</div>
+                  </div>
+                  <span class="badge soft" id="attachment-count">0 files</span>
+                </div>
+                <input class="input" id="attachments" type="file" multiple aria-label="Attach supporting documents" />
+                <div class="attachment-list" aria-label="Suggested files">
+                  <span class="chip">COA</span>
+                  <span class="chip">Certificate</span>
+                  <span class="chip">Allergen statement</span>
+                </div>
+              </div>
+            </div>
+            <div class="supplier-actions" style="justify-content:space-between;">
+              <span class="small">Clear labels help the supplier reply faster.</span>
+              <button class="button" type="button" id="submit-query-btn">Submit query</button>
+            </div>
+            
+            <div class="modal-overlay" id="submit-modal">
+              <div class="modal-box">
+                <h3>Confirm Query Submission</h3>
+                <div class="modal-summary" id="modal-summary">
+                  <strong>Supplier:</strong> North Coast Dairy<br>
+                  <strong>Type:</strong> Allergen information<br>
+                  <strong>Priority:</strong> Medium<br>
+                  <strong>Attachments:</strong> 0 files
+                </div>
+                <div class="modal-actions">
+                  <button class="button secondary" type="button" id="modal-cancel">Cancel</button>
+                  <button class="button" type="button" id="modal-confirm">Confirm & Submit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="screen" id="status" aria-label="Query Status Page mockup">
+          <div class="screen-top">
+            <div class="device-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="screen-title">
+              <div>
+                <h3>Query Status Page</h3>
+                <div class="small">A simple timeline makes progress easy to scan.</div>
+              </div>
+              <span class="badge resolved">Resolved</span>
+            </div>
+          </div>
+          <div class="screen-body">
+            <div class="status-summary" aria-label="Status summary">
+              <div class="summary-card">
+                <strong>SLA reminder</strong>
+                <span>Due in 2 days. Set an automatic follow-up if the supplier has not replied.</span>
+              </div>
+              <div class="summary-card">
+                <strong>Next action</strong>
+                <span>Request an updated certificate or mark the query resolved once documents are approved.</span>
+              </div>
+            </div>
+            <div class="activity-feed" aria-label="Activity feed">
+              <h4>Activity</h4>
+              <div class="activity-list" id="activity-list">
+                <div class="activity-item">
+                  <div class="activity-icon submit">📤</div>
+                  <div class="activity-time">09:30</div>
+                  <p>QA manager submitted the query draft and attached the relevant supplier reference.</p>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-icon acknowledge">👀</div>
+                  <div class="activity-time">10:05</div>
+                  <p>Supplier opened the request and acknowledged the certificate review.</p>
+                </div>
+              </div>
+            </div>
+            <div class="query-card">
+              <div class="query-head">
+                <div>
+                  <div class="supplier-name">North Coast Dairy</div>
+                  <div class="supplier-meta">Query: certificate expiry and allergen statement</div>
+                </div>
+                <span class="badge pending">In progress</span>
+              </div>
+              <div class="supplier-actions" style="margin-top: 10px;">
+                <span class="chip">Reminder enabled</span>
+                <span class="chip">Owner: QA manager</span>
+                <span class="chip">Priority: medium</span>
+              </div>
+            </div>
+
+            <div class="timeline" aria-label="Query timeline">
+              <div class="timeline-item done">
+                <h4>Query submitted</h4>
+                <p>QA manager sent the request with due date and priority attached.</p>
+              </div>
+              <div class="timeline-item wait">
+                <h4>Supplier acknowledged</h4>
+                <p>Supplier opened the query and confirmed they are preparing documents.</p>
+              </div>
+              <div class="timeline-item done">
+                <h4>Documents received</h4>
+                <p>Latest certificate and safety statement uploaded for review.</p>
+              </div>
+              <div class="timeline-item alert">
+                <h4>Closed with follow-up</h4>
+                <p>Issue resolved, but a reminder was added for expiry monitoring next quarter.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <div class="section-head">
+        <div>
+          <h2>Short Note</h2>
+          <p>Design decisions focused on speed, clarity, and low cognitive load.</p>
+        </div>
+      </div>
+      <div class="note-grid">
+        <div class="note-card">
+          <h3>Why these screens</h3>
+          <ul>
+            <li>The sequence matches the real task order: select supplier, raise the query, then track the response.</li>
+            <li>Status chips and progress bars make query health visible without opening every record.</li>
+          </ul>
+        </div>
+        <div class="note-card">
+          <h3>Why it is simple</h3>
+          <ul>
+            <li>Forms use short labels, grouped inputs, and one primary action per screen.</li>
+            <li>High contrast text, clear labels, and roomy spacing support readability and accessibility.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">Supplier Query Module concept for a food safety QA workflow.</div>
+  </main>
+</body>
+</html>
